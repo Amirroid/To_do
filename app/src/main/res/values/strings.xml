@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">To do</string>
+    <string name="search">search</string>
+    <string name="add">add</string>
+    <string name="my_works">My works</string>
+    <string name="add_a_category">Add a category</string>
+    <string name="title">title</string>
+    <string name="cancel">cancel</string>
+    <string name="confirm">confirm</string>
+    <string name="add_a_task">Add a task</string>
+    <string name="delete">delete</string>
+    <string name="set_date">Set date</string>
+    <string name="set_end_date">Set end date</string>
+    <string name="date_is_not_valid">The date is not valid</string>
+    <string name="set_time">Set time</string>
+    <string name="set_start_time">Set start time</string>
+    <string name="set_end_time">Set end time</string>
+    <string name="alarm_mode">Alarm mode</string>
+    <string name="detail">detail</string>
+    <string name="edit">edit</string>
+    <string name="to_day">To day</string>
+    <string name="title_activity_alarm">AlarmActivity</string>
+    <string name="done">done</string>
+    <string name="get_permission">Get permission</string>
+    <string name="chart">chart</string>
+    <string name="sort_by_time">Sort by time</string>
+    <string name="categorize_by_activity">Categorize by activity</string>
+    <string name="undone">undone</string>
+    <string name="doing">doing</string>
+    <string name="home">home</string>
+    <string name="tasks">tasks</string>
+</resources>
