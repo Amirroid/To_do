@@ -2,5 +2,7 @@
 <appwidget-provider
     android:initialLayout="@layout/tasks_widget"
     android:resizeMode="vertical|horizontal"
+    android:minResizeHeight="200dp"
+    android:minResizeWidth="200dp"
     android:previewLayout="@layout/tasks_widget"
     xmlns:android="http://schemas.android.com/apk/res/android" />

@@ -140,6 +140,7 @@ fun DetailScreen(
         }
     }
     DisposableEffect(key1 = Unit) {
+        viewModel.editMode = initialEdit
         viewModel.loadTask(taskId)
         onDispose { }
     }

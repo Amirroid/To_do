@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -24,7 +25,9 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.text.TextStyle
 import dagger.hilt.android.AndroidEntryPoint
+import ir.amirroid.todo.MainActivity
 import ir.amirroid.todo.models.repository.TaskRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,7 +39,10 @@ fun TasksWidget(repository: TaskRepository, context: Context, id: GlanceId) {
     val scope = rememberCoroutineScope()
     GlanceTheme {
         LazyColumn(
-            modifier = GlanceModifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+            modifier = GlanceModifier
+                .clickable {
+                    actionStartActivity<MainActivity>()
+                }.fillMaxSize().background(GlanceTheme.colors.background)
         ) {
             items(tasks.size) {
                 val task = tasks[it]
@@ -44,9 +50,7 @@ fun TasksWidget(repository: TaskRepository, context: Context, id: GlanceId) {
                     modifier = GlanceModifier.fillMaxWidth().height(64.dp).clickable {
                         scope.launch {
                             repository.update(task.copy(isDone = task.isDone.not()), false)
-                            updateAppWidgetState(context, id) {
-
-                            }
+                            updateAppWidgetState(context, id) {}
                         }
                     }
                 ) {
@@ -55,9 +59,18 @@ fun TasksWidget(repository: TaskRepository, context: Context, id: GlanceId) {
                             .padding(horizontal = 12.dp),
                         verticalAlignment = androidx.glance.layout.Alignment.CenterVertically,
                     ) {
-                        androidx.glance.text.Text(text = task.title)
+                        androidx.glance.text.Text(
+                            text = task.title, style = TextStyle(
+                                color = GlanceTheme.colors.onBackground
+                            )
+                        )
                         Spacer(GlanceModifier.defaultWeight())
-                        RadioButton(checked = task.isDone, onClick = null)
+                        RadioButton(checked = task.isDone, onClick = {
+                            scope.launch {
+                                repository.update(task.copy(isDone = task.isDone.not()), false)
+                                updateAppWidgetState(context, id) {}
+                            }
+                        })
 
                     }
                 }
