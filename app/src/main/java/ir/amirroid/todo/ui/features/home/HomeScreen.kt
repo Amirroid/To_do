@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -68,6 +69,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -88,6 +90,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.navigation.animation.AnimatedComposeNavigator
 import ir.amirroid.todo.R
 import ir.amirroid.todo.models.data.TaskInfo
@@ -205,60 +210,80 @@ fun HomeScreen(
                         viewModel.searchTasks.value
                     }
                 }
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(top = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    search.sortedBy {
-                        it.dateCreated
-                    }.reversed().groupBy { it.dateCreated.formatDate() }
-                        .forEach { (header, tasks) ->
-                            stickyHeader {
-                                val text =
-                                    if (header == System.currentTimeMillis().formatDate()
-                                    ) context.getString(
-                                        R.string.to_day
-                                    ) else header
-                                Text(
-                                    text = text,
-                                    modifier = Modifier
-                                        .padding(top = 12.dp)
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                                )
-                            }
-                            items(tasks.size, key = { tasks[it].id }) {
-                                val task = tasks[it]
-                                AnimatedVisibility(
-                                    visible = deletedList.contains(task).not(),
-                                    exit = shrinkVertically(tween(300)),
-                                    enter = slideInVertically(tween(300)),
-                                    initiallyVisible = false
-                                ) {
-                                    showedList.addIfNotExist(task)
-                                    ListItemView(onDelete = {
-                                        viewModel.deleteTask(task)
-                                    }, onEdit = {
-                                        navigation.navigate(
-                                            AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}&${Constants.DETAIL_PARAM_EDIT}=true"
-                                        )
-                                    }, modifier = Modifier.animateItemPlacement()) {
-                                        TaskView(task = task, { done ->
-                                            val newTask = task.copy(isDone = done)
-                                            viewModel.editTask(newTask, false)
-                                        }) {
-                                            navigation.navigate(AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}")
+                if (search.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(top = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        search.sortedBy {
+                            it.dateCreated
+                        }.reversed().groupBy { it.dateCreated.formatDate() }
+                            .forEach { (header, tasks) ->
+                                stickyHeader {
+                                    val text =
+                                        if (header == System.currentTimeMillis().formatDate()
+                                        ) context.getString(
+                                            R.string.to_day
+                                        ) else header
+                                    Text(
+                                        text = text,
+                                        modifier = Modifier
+                                            .padding(top = 12.dp)
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                                    )
+                                }
+                                items(tasks.size, key = { tasks[it].id }) {
+                                    val task = tasks[it]
+                                    AnimatedVisibility(
+                                        visible = deletedList.contains(task).not(),
+                                        exit = shrinkVertically(tween(300)),
+                                        enter = slideInVertically(tween(300)),
+                                        initiallyVisible = false
+                                    ) {
+                                        showedList.addIfNotExist(task)
+                                        ListItemView(onDelete = {
+                                            viewModel.deleteTask(task)
+                                        }, onEdit = {
+                                            navigation.navigate(
+                                                AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}&${Constants.DETAIL_PARAM_EDIT}=true"
+                                            )
+                                        }, modifier = Modifier.animateItemPlacement()) {
+                                            TaskView(task = task, { done ->
+                                                val newTask = task.copy(isDone = done)
+                                                viewModel.editTask(newTask, false)
+                                            }) {
+                                                navigation.navigate(AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}")
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                    item { BottomBarSpacer() }
+                        item { BottomBarSpacer() }
+                    }
+                } else {
+                    val composition by rememberLottieComposition(
+                        spec = LottieCompositionSpec.RawRes(
+                            R.raw.empty
+                        )
+                    )
+                    Column(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        LottieAnimation(composition = composition, modifier = Modifier
+                            .size(200.dp)
+                            .alpha(0.8f))
+                        Text(text = stringResource(id = R.string.empty_list), style = MaterialTheme.typography.headlineSmall)
+                    }
                 }
             }
             Box {
@@ -374,59 +399,79 @@ fun HomeScreen(
                         }
                     }
                 }
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    pageTasks.sortedBy {
-                        it.dateCreated
-                    }.reversed().groupBy { it.dateCreated.formatDate() }
-                        .forEach { (header, tasks) ->
-                            stickyHeader {
-                                val text =
-                                    if (header == System.currentTimeMillis().formatDate()
-                                    ) context.getString(
-                                        R.string.to_day
-                                    ) else header
-                                Text(
-                                    text = text,
-                                    modifier = Modifier
-                                        .padding(top = 12.dp)
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                                )
-                            }
-                            items(tasks.size, key = { tasks[it].id }) {
-                                val task = tasks[it]
-                                AnimatedVisibility(
-                                    visible = deletedList.contains(task).not(),
-                                    exit = shrinkVertically(tween(300)),
-                                    enter = slideInVertically(tween(300)),
-                                    initiallyVisible = showedList.contains(task)
-                                ) {
-                                    showedList.addIfNotExist(task)
-                                    ListItemView(onDelete = {
-                                        viewModel.deleteTask(task)
-                                    }, onEdit = {
-                                        navigation.navigate(
-                                            AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}&${Constants.DETAIL_PARAM_EDIT}=true"
-                                        )
-                                    }, modifier = Modifier.animateItemPlacement()) {
-                                        TaskView(task = task, { done ->
-                                            val newTask = task.copy(isDone = done)
-                                            viewModel.editTask(newTask, false)
-                                        }) {
-                                            navigation.navigate(AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}")
+                if (pageTasks.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        pageTasks.sortedBy {
+                            it.dateCreated
+                        }.reversed().groupBy { it.dateCreated.formatDate() }
+                            .forEach { (header, tasks) ->
+                                stickyHeader {
+                                    val text =
+                                        if (header == System.currentTimeMillis().formatDate()
+                                        ) context.getString(
+                                            R.string.to_day
+                                        ) else header
+                                    Text(
+                                        text = text,
+                                        modifier = Modifier
+                                            .padding(top = 12.dp)
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                                    )
+                                }
+                                items(tasks.size, key = { tasks[it].id }) {
+                                    val task = tasks[it]
+                                    AnimatedVisibility(
+                                        visible = deletedList.contains(task).not(),
+                                        exit = shrinkVertically(tween(300)),
+                                        enter = slideInVertically(tween(300)),
+                                        initiallyVisible = showedList.contains(task)
+                                    ) {
+                                        showedList.addIfNotExist(task)
+                                        ListItemView(onDelete = {
+                                            viewModel.deleteTask(task)
+                                        }, onEdit = {
+                                            navigation.navigate(
+                                                AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}&${Constants.DETAIL_PARAM_EDIT}=true"
+                                            )
+                                        }, modifier = Modifier.animateItemPlacement()) {
+                                            TaskView(task = task, { done ->
+                                                val newTask = task.copy(isDone = done)
+                                                viewModel.editTask(newTask, false)
+                                            }) {
+                                                navigation.navigate(AppPages.DetailScreen.route + "?${Constants.DETAIL_PARAM}=${task.id}")
+                                            }
                                         }
                                     }
                                 }
                             }
+                        item {
+                            BottomBarSpacer()
                         }
-                    item {
-                        BottomBarSpacer()
+                    }
+                } else {
+                    val composition by rememberLottieComposition(
+                        spec = LottieCompositionSpec.RawRes(
+                            R.raw.empty
+                        )
+                    )
+                    Column(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        LottieAnimation(composition = composition, modifier = Modifier
+                            .size(200.dp)
+                            .alpha(0.8f))
+                        Text(text = stringResource(id = R.string.empty_list), style = MaterialTheme.typography.headlineSmall)
                     }
                 }
             }

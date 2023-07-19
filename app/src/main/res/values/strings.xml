@@ -29,4 +29,5 @@
     <string name="doing">doing</string>
     <string name="home">home</string>
     <string name="tasks">tasks</string>
+    <string name="empty_list">Empty list</string>
 </resources>

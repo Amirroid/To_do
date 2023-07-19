@@ -95,6 +95,9 @@ dependencies {
     // glance
     implementation("androidx.glance:glance-material3:1.0.0-beta01")
     implementation("androidx.glance:glance-appwidget:1.0.0-beta01")
+
+    // lottie
+    implementation("com.airbnb.android:lottie-compose:4.0.0")
 }
 kapt {
     correctErrorTypes = true
