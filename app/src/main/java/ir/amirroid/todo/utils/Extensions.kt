@@ -153,8 +153,8 @@ fun TaskInfo.isRangeDate() =
 
 
 fun TaskInfo.getType() = when {
-    isRangeDate() -> 3
     isDone -> 2
+    isRangeDate() -> 3
     else -> 1
 }
 
